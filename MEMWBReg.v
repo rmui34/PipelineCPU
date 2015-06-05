@@ -7,7 +7,7 @@ module MEMWBReg (clk,WB,Rd, MemOut, ALURes,WBReg,RdReg,MemReg,ALUReg);
 
   output reg [1:0] WBReg;
   output reg [4:0] RdReg;
-  output reg [31:0] MemReg, ALURes;
+  output reg [31:0] MemReg, ALUReg;
 
   initial begin
     WBReg = 0;

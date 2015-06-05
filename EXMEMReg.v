@@ -1,5 +1,5 @@
 //Raymond Mui , AJ Townsend, Beck Pang
-module EXMEMReg(clk,WB, M, Data In,ALURes,RdRt,
+module EXMEMReg(clk,WB, M, DataIn,ALURes,RdRt,
   WBReg, MReg, DataOut,ALUReg, RdRtReg);
   input clk;
   input [1:0] WB;
