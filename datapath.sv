@@ -10,7 +10,7 @@ module datapath (
 	output Branch
 );
 	
-	wire [31:0] busA, busB, busC, busD, busE, busF,
+	wire [31:0] busA, busB, busC, busD, busE, busF, busX, busY
 				busS, busALUa, busALUb, busALUc,	// ALU result
 				busG, busData, 	// Memory Input
 				busH, busI,		// Memory Output
@@ -47,14 +47,14 @@ module datapath (
 			// add forwarding inside
 	forwardUnit	forward(RsEX, RtEX, RdRtME, RdRtWB, WBME[1], WBWB[1], ForwardA, ForwardB);
 	// Need to build a 32 bits mux
-	mux4_1 		ALUA (busX, busD, busWB, busALUb, 32'bx, ForwardA[1], ForwardA[0]);
-	mux4_1		ALUB (busX, busE, busWB, busALUb, 32'bx, ForwardB[1], ForwardB[0]);
+	mux32bit4_1 ALUA (busX, busD, busWB, busALUb, 32'bx, ForwardA[1], ForwardA[0]);
+	mux32bit4_1 ALUB (busY, busE, busWB, busALUb, 32'bx, ForwardB[1], ForwardB[0]); // Figure 4.57
 
-	assign 		busS	= ALUSrc ? busF : busE; // if EXID is 1, choose immediate busF, otherwise choose register output
+	assign 		busS	= ALUSrc ? busF : busY; // if EXID is 1, choose immediate busF, otherwise choose register output
 	ALUcontrol	translate (.ALUop(ALUOp), .instr(instr[5:0]), .ALUin(ALUctrl));
-	ALUnit  	ALU  (ALUctrl, busD, busS, busALUa, zero, overflow, carryout, negative);
+	ALUnit  	ALU  (ALUctrl, busX, busS, busALUa, zero, overflow, carryout, negative);
 	assign 		RdRtEX 	= RegDst ? RtEX : RdEX;
-	EXMEMReg 	EXMEM(clk, 	WBEX, MEEX, busE, busALUa, RdRtEX, 
+	EXMEMReg 	EXMEM(clk, 	WBEX, MEEX, busY, busALUa, RdRtEX, 
 							WBME, MEME, busG, busALUb, RdRtME);
 
 	// Memory Access state
