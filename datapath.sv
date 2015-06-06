@@ -7,13 +7,13 @@ module datapath (
 	input [2:0] MEID,	// Branch, MemRead, MemWrite
 	input [3:0] EXID,	// RegDst, ALUOp1, ALUOp0, ALUSrc
 	input [31:0] instr,
-	output zeroReg, Branch
+	output Branch
 );
 	
 	wire [31:0] busA, busB, busC, busD, busE, busF,
 				busS, busALUa, busALUb, busALUc,	// ALU result
 				busG, busData, 	// Memory Input
-				busH, busI		// Memory Output
+				busH, busI,		// Memory Output
 				busWB; 			// page 309
 	
 	wire [1:0] WBEX, WBME, WBWB;
@@ -24,7 +24,7 @@ module datapath (
 				RdRtEX, RdRtME, RdRtWB;
 
 	reg [2:0] ALUctrl;
-	reg zero, overflow, carryout, negative, zeroReg;
+	reg zero, overflow, carryout, negative, negativeReg;
 	wire ALUSrc, RegDst, MemRdEn, MemWrEn, RegWrEn;
 	wire [1:0] ALUOp;
 	assign RsID = instr[25:21];
@@ -48,11 +48,11 @@ module datapath (
 	ALUcontrol	translate (.ALUop(ALUOp), .instr(instr[5:0]), .ALUin(ALUctrl));
 	assign RdRtEX 	= RegDst ? RtEX : RdEX;
 	ALUnit  	ALU  (ALUctrl, busD, busS, busALUa, zero, overflow, carryout, negative);
-	EXMEMReg 	EXMEM(clk, 	WBEX, MEEX, busE, busALUa, RdRtEX, zero
-							WBME, MEME, busG, busALUb, RdRtME, zeroReg);
+	EXMEMReg 	EXMEM(clk, 	WBEX, MEEX, busE, busALUa, RdRtEX, 
+							WBME, MEME, busG, busALUb, RdRtME);
 
 	// Memory Access state
-	assign Branch	= MEME[2];
+			// assign Branch	= MEME[2] & ~negativeReg & ~zeroReg;	// Branch greater than at not negative nor zero
 	assign MemRdEn	= MEME[1];
 	assign MemWrEn	= MEME[0]; // MemRdEn was not implemented so MEME[1] was not used
 	dataMemory 	data (.clk(clk), .rst(MemRst), .adx(busALUb), .WrEn(MemWrEn), .data(busData));
