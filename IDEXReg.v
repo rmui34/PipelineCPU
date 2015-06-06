@@ -1,5 +1,5 @@
 //Raymond Mui , AJ Townsend, Beck Pang
-module IDEXReg (clk,Rs, Rt,Rd, WB, M, EX, busA, busB, busC
+module IDEXReg (clk,Rs, Rt,Rd, WB, M, EX, busA, busB, busC,
   RsReg, RtReg,RdReg,WBReg,MReg,EXReg, busAReg, busBReg, busCReg);
   input clk;
   input [1:0] WB; // page 310
@@ -26,7 +26,7 @@ module IDEXReg (clk,Rs, Rt,Rd, WB, M, EX, busA, busB, busC
   busCReg = 0;
   end
 
-  always @(posedge clk)
+  always @(posedge clk) begin
   WBReg <= WB;
   MReg <= M;
   EXReg <= EX;

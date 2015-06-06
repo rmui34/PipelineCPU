@@ -1,7 +1,6 @@
 module datapath (
 	input clk,  	// Clock
 	input MemRst,	// Load memory from a txt file
-	input [4:0] read0, read1, write,
 	// control lines
 	input [1:0] WBID,	// RegWrite, MemtoReg
 	input [2:0] MEID,	// Branch, MemRead, MemWrite
@@ -10,7 +9,7 @@ module datapath (
 	output Branch
 );
 	
-	wire [31:0] busA, busB, busC, busD, busE, busF, busX, busY
+	wire [31:0] busA, busB, busC, busD, busE, busF, busX, busY,
 				busS, busALUa, busALUb, busALUc,	// ALU result
 				busG, busData, 	// Memory Input
 				busH, busI,		// Memory Output
@@ -47,8 +46,8 @@ module datapath (
 			// add forwarding inside
 	forwardUnit	forward(RsEX, RtEX, RdRtME, RdRtWB, WBME[1], WBWB[1], ForwardA, ForwardB);
 	// Need to build a 32 bits mux
-	mux32bit4_1 ALUA (busX, busD, busWB, busALUb, 32'bx, ForwardA[1], ForwardA[0]);
-	mux32bit4_1 ALUB (busY, busE, busWB, busALUb, 32'bx, ForwardB[1], ForwardB[0]); // Figure 4.57
+	mux32bit4_1 ALUA (busX, busD, busWB, busALUb, 32'bx, ForwardA);
+	mux32bit4_1 ALUB (busY, busE, busWB, busALUb, 32'bx, ForwardB); // Figure 4.57
 
 	assign 		busS	= ALUSrc ? busF : busY; // if EXID is 1, choose immediate busF, otherwise choose register output
 	ALUcontrol	translate (.ALUop(ALUOp), .instr(instr[5:0]), .ALUin(ALUctrl));

@@ -4,14 +4,16 @@ module IFIDReg (clk,flush,IFIDWr,instr,instrReg);
   input [31:0] instr;
   output reg [31:0] instrReg;
 
-  instrReg = 0;
+  initial begin
+    instrReg = 0;
+  end
 
   always @(posedge clk)
   begin
     if(flush)
       instrReg<=0;
     else if(IFIDWr)
-      instrReg <= Inst;
+      instrReg <= instr;
   end
 
 endmodule
