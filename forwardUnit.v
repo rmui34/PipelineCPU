@@ -11,7 +11,7 @@ module forwardUnit (IDEXRs, IDEXRt, EXMEMRdMEM, MEMWBRd, EXMEMRegWrite, MEMWBReg
 			if (EXMEMRegWrite && (EXMEMRd != 0) && (EXMEMRd == IDEXRs))
 				ForwardA = 2'b10;
 			else if(MEMWBRegWrite && (MEMWBRd != 0) &&  ~(EXMEMRegWrite & (EXMEMRd != 0)) && (EXMEMRd !=IDEXRs) && (MEMWBRd == IDEXRs))
-				ForwardB = 2'b01;
+				ForwardA = 2'b01;
 			else
 				ForwardA = 2'b00;
 		end
