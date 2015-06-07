@@ -22,8 +22,8 @@ module datapath (
 				RsEX, RtEX, RdEX,
 				RdRtEX, RdRtME, RdRtWB;
 	wire [1:0] ForwardA, ForwardB;
-	reg [2:0] ALUctrl;
-	reg zero, overflow, carryout, negative, negativeReg;
+	wire [2:0] ALUctrl;
+	wire zero, overflow, carryout, negative, negativeReg;
 	wire ALUSrc, RegDst, MemRdEn, MemWrEn, RegWrEn;
 	wire [1:0] ALUOp;
 	assign 		RsID = instr[25:21];
