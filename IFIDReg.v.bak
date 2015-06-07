@@ -1,9 +1,7 @@
 //Raymond Mui , AJ Townsend, Beck Pang
-module IFIDReg (clk,flush,IFIDWr,instr, progCD, progCQ, instrReg);
+module IFIDReg (clk,flush,IFIDWr,instr,instrReg);
   input clk,flush,IFIDWr;
   input [31:0] instr;
-  input [6:0] progCD;
-  output reg progCQ;
   output reg [31:0] instrReg;
 
   initial begin
@@ -12,7 +10,6 @@ module IFIDReg (clk,flush,IFIDWr,instr, progCD, progCQ, instrReg);
 
   always @(posedge clk)
   begin
-	progCQ <= progCD;
     if(flush)
       instrReg<=0;
     else if(IFIDWr)

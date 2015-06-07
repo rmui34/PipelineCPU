@@ -1,30 +1,14 @@
-module pipes (clk, rst);
-	input clk, rst;
+module datapath (
+	input clk,  	// Clock
+	input MemRst,	// Load memory from a txt file
+	// control lines
+	input [1:0] WBID,	// RegWrite, MemtoReg
+	input [2:0] MEID,	// Branch, MemRead, MemWrite
+	input [3:0] EXID,	// RegDst, ALUOp1, ALUOp0, ALUSrc
+	input [31:0] instr,
+	output Branch
+);
 	
-	
-	
-	
-
-	
-	// Program Counter Register
-	// Stores and Updates the program counter
-	ProgCountReg pc(clk, rst, instrQ[25:0], brAdx, j, br, z, prgCount);
-	
-	// Instruction Memory
-	// Holds the instructions
-	InstruMemory memInstr(clk, prgCount, IMR, instrD, rst);
-	
-	// Bridges the Fetch and Decode
-	IFIDReg (clk,flush,IFIDWr,instrD, progCD, progCQ,instrQ);
-	
-	registerFile regs(clk, regAdx1, regAdx2, writeAdx, regWR, writeData, readOutput1, readOutput2);
-	ALUnit logicUnit(control, busA, busB, busOut, zero, overflow, carryout, negative);
-	SRAM2Kby16 dataMemory(clk, adxData, MemWrEn, data);
-	
-	// Instruction Decoder
-	// Decodes the 32-bit instruction into appropriate control signals
-	InstrucDecoder decoder(instrQ[31:26], j, br, Mem2Reg, ALUop, MemWrEn, ALUsrc, RegDst, regWR);
-	/*
 	wire [31:0] busA, busB, busC, busD, busE, busF, busX, busY,
 				busS, busALUa, busALUb, busALUc,	// ALU result
 				busG, busData, 	// Memory Input
@@ -48,7 +32,7 @@ module pipes (clk, rst);
 
 	// Need to put register file, ID/EX registers, ALU, 
 	// EX/MEM register, Data Memory, MEM/WB register, and mux here
-/*
+
 	// Instruction decoding state
 	registerFile file(clk, RsID, RtID, write, RegWrEn, busWB, busA, busB);
 	assign 		busC 	= {{16{instr[15]}}, instr[15:0]};
