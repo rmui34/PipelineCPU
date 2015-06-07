@@ -2,7 +2,7 @@
 module forwardUnit (IDEXRs, IDEXRt, EXMEMRdMEM, MEMWBRd, EXMEMRegWrite, MEMWBRegWrite,ForwardA, ForwardB);
 	input [4:0] IDEXRs, IDEXRt, EXMEMRd, MEMWBRd;
 	input EXMEMRegWrite, MEMWBRegWrite;
-	output reg [1:0] ForwardA, ForwardB
+	output reg [1:0] ForwardA, ForwardB;
 
 
 	//Forward A
