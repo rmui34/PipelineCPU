@@ -6,7 +6,7 @@ module IDEXReg (clk,Rs, Rt,Rd, WB, M, EX, busA, busB, imd,
   input [2:0] M;
   input [3:0] EX;
   input [4:0] Rs, Rt, Rd;
-  
+
   // busA, and busB are inputs to ALU from prev design
   input [31:0] busA, busB, imd; // immediate = busC
   output reg [1:0] WBReg;
