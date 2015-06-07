@@ -3,8 +3,9 @@ module pipes (clk, rst);
 	
 	
 	
-	
-
+	///////////////////////////////////////////////////////////////////////////////////
+	// FETCH																									//
+	///////////////////////////////////////////////////////////////////////////////////
 	
 	// Program Counter Register
 	// Stores and Updates the program counter
@@ -17,13 +18,41 @@ module pipes (clk, rst);
 	// Bridges the Fetch and Decode
 	IFIDReg (clk,flush,IFIDWr,instrD, progCD, progCQ,instrQ);
 	
-	registerFile regs(clk, regAdx1, regAdx2, writeAdx, regWR, writeData, readOutput1, readOutput2);
-	ALUnit logicUnit(control, busA, busB, busOut, zero, overflow, carryout, negative);
-	SRAM2Kby16 dataMemory(clk, adxData, MemWrEn, data);
+	///////////////////////////////////////////////////////////////////////////////////
+	// DECODE																								//
+	///////////////////////////////////////////////////////////////////////////////////
+	
+	registerFile regs(clk, instrQ[25:21], instrQ[20:16], dstReg, WBregWR, writeData, readOutput1D, readOutput2D);
+	
+	assign bgt = 
 	
 	// Instruction Decoder
 	// Decodes the 32-bit instruction into appropriate control signals
 	InstrucDecoder decoder(instrQ[31:26], j, br, Mem2Reg, ALUop, MemWrEn, ALUsrc, RegDst, regWR);
+	
+	IDEXReg  	IDEX (clk, 	RsID, RtID, RdID, {Mem2Reg, regWR}, {br, MemWrEn}, {ALUop, ALUsrc, RegDst}, IFbusA, IFbusB, IFimd, 
+									RsEX, RtEX, RdEX, WBEX, MEMEX, EX, EXbusA, EXbusB, EXimd);
+									
+	///////////////////////////////////////////////////////////////////////////////////
+	// EXECUTE																								//
+	///////////////////////////////////////////////////////////////////////////////////
+	
+	ALUnit logicUnit(control, EXbusA, EXbusB, EXbusOut, zero, overflow, carryout, negative);
+	
+	EXMEMReg 	EXMEM(clk, 	WBEX, MEEX, busY, busALUa, RdRtEX, WBME, ME, busG, busALUb, RdRtME);
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// MEMORY																								//
+	///////////////////////////////////////////////////////////////////////////////////
+	
+	SRAM2Kby16 dataMemory(clk, adxData, MemWrEn, data);
+	
+	MEMWBReg MEMWB(clk,	WBME,RdRtME, busH, busALUb, WB,RdRtWB, busI, busALUc);
+	
+	///////////////////////////////////////////////////////////////////////////////////
+	// WRITE BACK																							//
+	///////////////////////////////////////////////////////////////////////////////////
+	
 	/*
 	wire [31:0] busA, busB, busC, busD, busE, busF, busX, busY,
 				busS, busALUa, busALUb, busALUc,	// ALU result
