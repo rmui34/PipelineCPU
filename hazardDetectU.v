@@ -4,7 +4,7 @@
 // The next two lines check to see if the destination register field of the load in the EX stage matches either source register
 // of the instruction in the ID stage. If the condition holds, the instruction stalls one clock cycle. After this 1-cycle stall,
 //  the forwarding logic can handle the dependence and execution proceeds.
-module hazardDetectU(IFIDRegRs,IFIDRegRt,IDEXRegRt,IDEXMemRead,IFIDWr,PCWr,hazCtrl)
+module hazardDetectU(IFIDRegRs,IFIDRegRt,IDEXRegRt,IDEXMemRead,IFIDWr,PCWr,hazCtrl);
   input [4:0]IFIDRegRs,IFIDRegRt,IDEXRegRt;
   input IDEXMemRead;
 
