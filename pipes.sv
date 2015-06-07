@@ -1,7 +1,7 @@
 module pipes (clk, rst);
 	input clk, rst;
 	
-	
+	assign jAdx = (JR) ? IFbusA : instrQ[25:0];
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	// FETCH																									//
@@ -9,37 +9,42 @@ module pipes (clk, rst);
 	
 	// Program Counter Register
 	// Stores and Updates the program counter
-	ProgCountReg pc(clk, rst, instrQ[25:0], brAdx, j, br, z, prgCount);
+	// Takes zero flag and br signal from the decoder from ALU to operate
+	// on the SLT, BEQ pseudoinstruction for BGT
+	ProgCountReg pc(clk, rst, jAdx, brAdx, j, br, zero, prgCount);
 	
 	// Instruction Memory
 	// Holds the instructions
 	InstruMemory memInstr(clk, prgCount, IMR, instrD, rst);
 	
 	// Bridges the Fetch and Decode
-	IFIDReg (clk,flush,IFIDWr,instrD, progCD, progCQ,instrQ);
+	IFIDReg (clk, flush, IFIDWr, instrD, progCD, progCQ, instrQ);
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	// DECODE																								//
 	///////////////////////////////////////////////////////////////////////////////////
 	
-	registerFile regs(clk, instrQ[25:21], instrQ[20:16], dstReg, WBregWR, writeData, readOutput1D, readOutput2D);
+	registerFile regs(clk, instrQ[25:21], instrQ[20:16], dstReg, WBregWR, writeData, IFbusA, IFbusB);
 	
-	assign bgt = 
 	
 	// Instruction Decoder
 	// Decodes the 32-bit instruction into appropriate control signals
-	InstrucDecoder decoder(instrQ[31:26], j, br, Mem2Reg, ALUop, MemWrEn, ALUsrc, RegDst, regWR);
+	InstrucDecoder decoder(instrQ[31:26], j, br, Mem2Reg, ALUop, MemWrEn, ALUsrc, RegDst, regWR, JR);
 	
-	IDEXReg  	IDEX (clk, 	RsID, RtID, RdID, {Mem2Reg, regWR}, {br, MemWrEn}, {ALUop, ALUsrc, RegDst}, IFbusA, IFbusB, IFimd, 
-									RsEX, RtEX, RdEX, WBEX, MEMEX, EX, EXbusA, EXbusB, EXimd);
+	IDEXReg IDEX (clk, RsID, RtID, RdID, {Mem2Reg, regWR}, {br, MemWrEn}, {ALUop, ALUsrc, RegDst}, IFbusA, IFbusB, IFimd, 
+							 RsEX, RtEX, RdEX, WBEX, MEMEX, EX, EXbusA, EXbusB, EXimd);
 									
 	///////////////////////////////////////////////////////////////////////////////////
 	// EXECUTE																								//
 	///////////////////////////////////////////////////////////////////////////////////
 	
-	ALUnit logicUnit(control, EXbusA, EXbusB, EXbusOut, zero, overflow, carryout, negative);
+	assign ALUB = (ALUsrc) ? EXimd : EXbusB;
 	
-	EXMEMReg 	EXMEM(clk, 	WBEX, MEEX, busY, busALUa, RdRtEX, WBME, ME, busG, busALUb, RdRtME);
+	ALUcontrol translate(EX[1:0], EXimd[5:0], control);
+	
+	ALUnit logicUnit(control, EXbusA, ALUB, EXbusOut, zero, overflow, carryout, negative);
+	
+	EXMEMReg EXMEM(clk, 	WBEX, MEMEX, EXbusB, EXbusOut, RdRtEX, WBME, ME, busG, busALU, RdRtME);
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	// MEMORY																								//
