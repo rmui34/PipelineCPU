@@ -11,7 +11,7 @@ module pipes (clk, rst);
 	
 	assign flush = 0;
 	assign jAdx = instrQ[25:0];
-	assign JRAdx = IFbusA;
+	assign JRAdx = IDbusA;
 	assign brAdx = {{16{instrQ[15]}}, instrQ[15:0]};
 	
 	hazardDetectU hazItAll(instrQ[25:21], instrQ[20:16], RtEX, M, IFIDWr, PCWr, hazCtrl);

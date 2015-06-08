@@ -11,7 +11,7 @@ module hazardDetectU(IFIDRegRs,IFIDRegRt,IDEXRegRt,IDEXMemRead,IFIDWr,PCWr,hazCt
   output reg IFIDWr,PCWr, hazCtrl;
 
   always @(IFIDRegRs,IFIDRegRt,IDEXRegRt,IDEXMemRead)
-    if(IDEXMemRead & (IDEXRegRt == IFIDRegRs) | (IDEXRegRt == IFIDRegRt))
+    if (IDEXMemRead & ((IDEXRegRt == IFIDRegRs) | (IDEXRegRt == IFIDRegRt)))
       begin
         IFIDWr = 0;
         PCWr = 0;
@@ -24,4 +24,30 @@ module hazardDetectU(IFIDRegRs,IFIDRegRt,IDEXRegRt,IDEXMemRead,IFIDWr,PCWr,hazCt
         hazCtrl= 0;
       end
 
+endmodule
+
+module hazardDetectU_test ();
+  reg [4:0]IFIDRegRs,IFIDRegRt,IDEXRegRt;
+  reg IDEXMemRead;
+  wire IFIDWr,PCWr, hazCtrl;
+
+  hazardDetectU dut(IFIDRegRs,IFIDRegRt,IDEXRegRt,IDEXMemRead,IFIDWr,PCWr,hazCtrl);
+
+  parameter d = 20;
+
+  initial begin
+    #d;
+    IDEXMemRead <= 1'b1;
+    IFIDRegRs <= 5'b1; IFIDRegRt <= 5'b101; 
+    IDEXRegRt <= 5'b1; 
+    #d;
+    #d;
+    IDEXMemRead <= 1'b1;
+    IFIDRegRs <= 5'b100; IFIDRegRt <= 5'b101; 
+    IDEXRegRt <= 5'b1; 
+    #d;
+    #d;
+    $stop;
+    $finish;
+  end 
 endmodule
