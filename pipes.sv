@@ -1,5 +1,10 @@
-module pipes (clk, rst);
-	input clk, rst;
+module pipes (CLOCK_50, KEY);
+	input CLOCK_50;
+	input [3:0] KEY;
+	wire clk, rst;
+	
+	assign clk = CLOCK_50;
+	assign rst = KEY[0];
 	
 	wire [31:0] jAdx, JRAdx, brAdx, instrD, instrQ, IDbusA, IDbusB, writeData, EXbusA, EXbusB, EXbusOut, ALUB, busA, busB, busALU, WrData, busALUWB;
 	wire [15:0] IDimd, EXimd, data, ReadData;
@@ -46,7 +51,7 @@ module pipes (clk, rst);
 	// Decodes the 32-bit instruction into appropriate control signals
 	InstrucDecoder decoder(instrQ[31:26], j, br, Mem2Reg, ALUop, MemWrEn, ALUsrc, RegDst, regWR, JR);
 	
-	assign {IDWB, IDM, IDEX} = hazCtrl ? 7'b0 : {{Mem2Reg, regWR}, MemWrEn, {ALUop, ALUsrc, RegDst}};
+	assign {IDWB, IDM, IDEX} = hazCtrl ? 7'b0110000 : {{Mem2Reg, regWR}, MemWrEn, {ALUop, ALUsrc, RegDst}};
 	
 	assign RsID  = instrQ[25:21];
 	assign RtID  = instrQ[20:16];
@@ -67,9 +72,10 @@ module pipes (clk, rst);
 	mux32bit4_1 busAfwd(busA, EXbusA, writeData, busALU, 0, fwdA);
 	mux32bit4_1 busBfwd(busB, EXbusB, writeData, busALU, 0, fwdB);
 	
-	forwardUnit movinFWD(RsEX, RtEX, RdRtME, dstReg, WBME[0], WB[0], fwdA, fwdB);
+	//IDEXRs, IDEXRt, EXMEMRd, MEMWBRd, EXMEMRegWrite, MEMWBRegWrite,ForwardA, ForwardB
+	forwardUnit movinFWD(RsEX, RtEX, RdRtME, dstReg, ~WBME[0], ~WB[0], fwdA, fwdB);
 	
-	ALUcontrol translate(EX[1:0], EXimd[5:0], control);
+	ALUcontrol translate(EX[3:2], EXimd[5:0], control);
 	
 	ALUnit logicUnit(control, busA, ALUB, EXbusOut, zero, overflow, carryout, negative);
 	
@@ -81,7 +87,7 @@ module pipes (clk, rst);
 	
 	assign data = ME ? WrData[15:0] : 16'bZ;
 	
-	SRAM2Kby16 dataMemory(clk, busALU, ME, data);
+	SRAM2Kby16 dataMemory(clk, rst, busALU, ME, data);
 	
 	MEMWBReg MEMWB(clk, WBME, RdRtME, data, busALU, WB, dstReg, ReadData, busALUWB);
 	
@@ -91,5 +97,5 @@ module pipes (clk, rst);
 	
 	assign writeData = WB[1] ? {{16{ReadData[15]}}, ReadData[15:0]} : busALUWB;
 
-	endmodule
+endmodule
 	

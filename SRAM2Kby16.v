@@ -18,9 +18,8 @@ module SRAM2Kby16(clk, rst, adx, WrEn, data);
 	always @(posedge clk) begin
 		if(~WrEn) 
 				SRAM[adx] = data; // assign the SRAM index to data
-				
 		if(rst)		
-				$readmemh("datahmem.txt", SRAM, 16, 31);
+				$readmemh("datahmem.txt", SRAM, 16, 35);
 	end
 
 endmodule  

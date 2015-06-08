@@ -14,7 +14,7 @@ module InstruMemory (clk, adx, WrEn, data, rst);
 	
 	always @(posedge clk) begin
 		if(rst)
-			$readmemb("boobs.txt", SRAM, 0, 15);
+			$readmemb("instructions.txt", SRAM, 0, 70);
 		else if(~WrEn) 
 			SRAM[adx] = 0; // assign the SRAM index to data
 	end
