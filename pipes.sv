@@ -1,12 +1,14 @@
 module pipes (clk, rst);
 	input clk, rst;
 	
-	wire [31:0] jAdx, JRAdx, brAdx, instrD, instrQ, IDbusA, IDbusB;
+	wire [31:0] jAdx, JRAdx, brAdx, instrD, instrQ, IDbusA, IDbusB, writeData, EXbusA, EXbusB, EXbusOut, ALUB, busA, busB, busALU, WrData, busALUWB;
+	wire [15:0] IDimd, EXimd, data, ReadData;
 	wire [6:0] prgCD, prgCQ;
-	wire [4:0] RsID, RtID, RdID, RsEX, RtEX, RdEX;
+	wire [4:0] RsID, RtID, RdID, RsEX, RtEX, RdEX, dstReg, RdRtEX, RdRtME;
 	wire [3:0] IDEX, EX;
-	wire [1:0] ALUop, IDWB, WBEX, WBME, WB;
-	wire IFIDWr, PCWr, hazCtrl, flush, JR, regWR, RegDst, ALUsrc, MemWrEn, Mem2Reg, br, j, IDM, MEX, M, zero;
+	wire [2:0] control;
+	wire [1:0] ALUop, IDWB, WBEX, WBME, WB, fwdA, fwdB;
+	wire IFIDWr, PCWr, hazCtrl, flush, JR, regWR, RegDst, ALUsrc, MemWrEn, Mem2Reg, br, j, IDM, MEX, ME, zero, overflow, carryout, negative;
 	
 	
 	assign flush = 0;
@@ -14,7 +16,7 @@ module pipes (clk, rst);
 	assign JRAdx = IDbusA;
 	assign brAdx = {{16{instrQ[15]}}, instrQ[15:0]};
 	
-	hazardDetectU hazItAll(instrQ[25:21], instrQ[20:16], RtEX, M, IFIDWr, PCWr, hazCtrl);
+	hazardDetectU hazItAll(instrQ[25:21], instrQ[20:16], RtEX, ME, IFIDWr, PCWr, hazCtrl);
 	
 	///////////////////////////////////////////////////////////////////////////////////
 	// FETCH																									//
@@ -44,7 +46,7 @@ module pipes (clk, rst);
 	// Decodes the 32-bit instruction into appropriate control signals
 	InstrucDecoder decoder(instrQ[31:26], j, br, Mem2Reg, ALUop, MemWrEn, ALUsrc, RegDst, regWR, JR);
 	
-	assign {IDWB, IDM, IDEX} = hazCtrl ? 0 : {{Mem2Reg, regWR}, MemWrEn, {ALUop, ALUsrc, RegDst}};
+	assign {IDWB, IDM, IDEX} = hazCtrl ? 7'b0 : {{Mem2Reg, regWR}, MemWrEn, {ALUop, ALUsrc, RegDst}};
 	
 	assign RsID  = instrQ[25:21];
 	assign RtID  = instrQ[20:16];
@@ -77,9 +79,9 @@ module pipes (clk, rst);
 	// MEMORY																								//
 	///////////////////////////////////////////////////////////////////////////////////
 	
-	assign data = M ? WrData[15:0] : 16'bZ;
+	assign data = ME ? WrData[15:0] : 16'bZ;
 	
-	SRAM2Kby16 dataMemory(clk, busALU, M, data);
+	SRAM2Kby16 dataMemory(clk, busALU, ME, data);
 	
 	MEMWBReg MEMWB(clk, WBME, RdRtME, data, busALU, WB, dstReg, ReadData, busALUWB);
 	
@@ -87,7 +89,7 @@ module pipes (clk, rst);
 	// WRITE BACK																							//
 	///////////////////////////////////////////////////////////////////////////////////
 	
-	assign writeData = WB[1] ? ReadData : busALUWB;
+	assign writeData = WB[1] ? {{16{ReadData[15]}}, ReadData[15:0]} : busALUWB;
 
 	endmodule
 	

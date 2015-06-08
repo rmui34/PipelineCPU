@@ -3,7 +3,7 @@ module IFIDReg (clk,flush,IFIDWr,instr, progCD, progCQ, instrReg);
   input clk,flush,IFIDWr;
   input [31:0] instr;
   input [6:0] progCD;
-  output reg [6:0] progCQ;
+  output reg progCQ;
   output reg [31:0] instrReg;
 
   initial begin
